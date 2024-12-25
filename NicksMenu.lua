@@ -65,11 +65,7 @@ function toggleMenu()
     if menuExpanded then
         menuFrame:TweenSize(UDim2.new(0, 250, 0, 50), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
     else
-        if isMobile then
-            menuFrame:TweenSize(UDim2.new(0, 200, 0, 350), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
-        else
-            menuFrame:TweenSize(UDim2.new(0, 250, 0, 400), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
-        end
+        menuFrame:TweenSize(UDim2.new(0, 250, 0, 400), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
     end
     menuExpanded = not menuExpanded
 end
@@ -81,20 +77,6 @@ toggleMenuButton.Size = UDim2.new(0, 120, 0, 40)
 toggleMenuButton.Position = UDim2.new(0, 10, 0, 70)
 toggleMenuButton.Parent = menuFrame
 toggleMenuButton.MouseButton1Click:Connect(toggleMenu)
-
--- Check if the player is on mobile or PC
-local UserInputService = game:GetService("UserInputService")
-local isMobile = UserInputService.TouchEnabled
-
-if isMobile then
-    menuFrame.Size = UDim2.new(0, 200, 0, 50)
-    menuTitle.TextSize = 20
-    toggleMenuButton.Size = UDim2.new(0, 120, 0, 40)
-else
-    menuFrame.Size = UDim2.new(0, 250, 0, 50)
-    menuTitle.TextSize = 24
-    toggleMenuButton.Size = UDim2.new(0, 150, 0, 50)
-end
 
 -- Create categories for different settings
 local playerSettings = Instance.new("Frame")
@@ -145,8 +127,8 @@ noclipButton.Parent = movementSettings
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 
--- For toggling the outline (Client-side)
-local function toggleOutline()
+-- For toggling the outline
+outlineButton.MouseButton1Click:Connect(function()
     for _, v in pairs(game.Workspace:GetChildren()) do
         if v:IsA("Model") and v:FindFirstChild("Head") then
             local outline = v:FindFirstChild("Outline")
@@ -161,29 +143,29 @@ local function toggleOutline()
             end
         end
     end
-end
+end)
 
--- For showing player info (Client-side)
-local function showPlayerInfo()
+-- For showing player info
+showInfoButton.MouseButton1Click:Connect(function()
     local playerInfo = "Name: " .. player.Name .. "\n"
     playerInfo = playerInfo .. "Distance: " .. (player.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude .. " studs\n"
     playerInfo = playerInfo .. "Join Date: " .. player.AccountAge .. " days"
     print(playerInfo)
-end
+end)
 
--- For fast animations (simply adjusts the speed) (Client-side)
-local function fastAnimation()
+-- For fast animations (simply adjusts the speed)
+fastAnimationButton.MouseButton1Click:Connect(function()
     local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid.WalkSpeed = 100  -- Make walking faster
         humanoid.JumpHeight = 50  -- Make jumping higher
     end
-end
+end)
 
--- For fly mode (Server-side)
+-- For fly mode
 local flying = false
 local bodyVelocity = nil
-local function toggleFly()
+flyButton.MouseButton1Click:Connect(function()
     if flying then
         bodyVelocity:Destroy()
         flying = false
@@ -194,11 +176,11 @@ local function toggleFly()
         bodyVelocity.Parent = character:FindFirstChild("HumanoidRootPart")
         flying = true
     end
-end
+end)
 
--- For noclip mode (Server-side)
+-- For noclip mode
 local noclip = false
-local function toggleNoclip()
+noclipButton.MouseButton1Click:Connect(function()
     noclip = not noclip
     if noclip then
         character:FindFirstChild("Humanoid").PlatformStand = true
@@ -215,11 +197,4 @@ local function toggleNoclip()
             end
         end
     end
-end
-
--- Connect button actions
-outlineButton.MouseButton1Click:Connect(toggleOutline)
-showInfoButton.MouseButton1Click:Connect(showPlayerInfo)
-fastAnimationButton.MouseButton1Click:Connect(fastAnimation)
-flyButton.MouseButton1Click:Connect(toggleFly)
-noclipButton.MouseButton1Click:Connect(toggleNoclip)
+end)
