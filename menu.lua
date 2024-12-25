@@ -65,56 +65,80 @@ minimizeButton.MouseButton1Click:Connect(function()
     mainFrame.Size = isMinimized and UDim2.new(0, 400, 0, 60) or UDim2.new(0, 400, 0, 500)
 end)
 
+-- Drag Functionality
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleLabel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleLabel.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
 -- Animate Main Menu Appearance
 mainFrame.Position = UDim2.new(0.5, -200, 0.5, -600)
 mainFrame.Visible = true
 mainFrame:TweenPosition(UDim2.new(0.5, -200, 0.5, -250), "Out", "Bounce", 1, true)
 
--- Create Categories
-local categories = {
-    {Name = "Player Scripts", Color = Color3.fromRGB(50, 50, 200)},
-    {Name = "Visuals", Color = Color3.fromRGB(200, 50, 50)},
-    {Name = "Miscellaneous", Color = Color3.fromRGB(50, 200, 50)},
-}
+-- Buttons and Scripts
+local button1 = Instance.new("TextButton", mainFrame)
+button1.Size = UDim2.new(0.9, 0, 0, 50)
+button1.Position = UDim2.new(0.05, 0, 0, 100)
+button1.Text = "Outline Players"
+button1.TextScaled = true
+button1.Font = Enum.Font.Gotham
+button1.TextColor3 = Color3.fromRGB(255, 255, 255)
+button1.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
 
-local categoryFrames = {}
-for i, category in ipairs(categories) do
-    local button = Instance.new("TextButton", mainFrame)
-    button.Size = UDim2.new(0.9, 0, 0, 60)
-    button.Position = UDim2.new(0.05, 0, 0, 80 + (i - 1) * 80)
-    button.Text = category.Name
-    button.TextScaled = true
-    button.Font = Enum.Font.Gotham
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.BackgroundColor3 = category.Color
-
-    -- Create category frame
-    local categoryFrame = Instance.new("Frame", mainFrame)
-    categoryFrame.Size = UDim2.new(1, 0, 0.6, 0)
-    categoryFrame.Position = UDim2.new(0, 0, 0, 80 + (i - 1) * 80 + 70)
-    categoryFrame.BackgroundTransparency = 1
-    categoryFrame.Visible = false
-    table.insert(categoryFrames, categoryFrame)
-
-    -- Toggle visibility of category
-    button.MouseButton1Click:Connect(function()
-        for _, frame in pairs(categoryFrames) do
-            frame.Visible = false
+button1.MouseButton1Click:Connect(function()
+    for _, target in pairs(game.Players:GetPlayers()) do
+        if target ~= player then
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = target.Character
+            highlight.Adornee = target.Character
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
         end
-        categoryFrame.Visible = true
-    end)
-end
+    end
+end)
 
--- Example Buttons in Categories
-local exampleButton = Instance.new("TextButton", categoryFrames[1])
-exampleButton.Size = UDim2.new(0.8, 0, 0, 50)
-exampleButton.Position = UDim2.new(0.1, 0, 0, 20)
-exampleButton.Text = "Outline Players"
-exampleButton.TextScaled = true
-exampleButton.Font = Enum.Font.Gotham
-exampleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-exampleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 200)
+local button2 = Instance.new("TextButton", mainFrame)
+button2.Size = UDim2.new(0.9, 0, 0, 50)
+button2.Position = UDim2.new(0.05, 0, 0, 160)
+button2.Text = "Fast Animations"
+button2.TextScaled = true
+button2.Font = Enum.Font.Gotham
+button2.TextColor3 = Color3.fromRGB(255, 255, 255)
+button2.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
 
-exampleButton.MouseButton1Click:Connect(function()
-    -- Your script logic here
+button2.MouseButton1Click:Connect(function()
+    for _, anim in pairs(player.Character.Humanoid.Animator:GetPlayingAnimationTracks()) do
+        anim:AdjustSpeed(2.5)
+    end
 end)
