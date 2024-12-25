@@ -29,11 +29,11 @@ introFrame:Destroy()
 -- Main Menu UI
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.Size = UDim2.new(0, 400, 0, 500)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)  -- Centered position (default)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)  -- Centered position
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 mainFrame.BorderSizePixel = 0
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.Visible = false
+mainFrame.Visible = false  -- Initially hidden
 
 local titleLabel = Instance.new("TextLabel", mainFrame)
 titleLabel.Size = UDim2.new(1, 0, 0, 60)
@@ -102,10 +102,13 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     end
 end)
 
--- Make sure the menu starts offscreen, then animate to the center
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -600) -- Starts above the screen
+-- Ensure the menu is initially centered (no need to start off-screen)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)  -- Properly centered from the start
 mainFrame.Visible = true
-mainFrame:TweenPosition(UDim2.new(0.5, -200, 0.5, -250), "Out", "Bounce", 1, true) -- Animate to center
+
+-- Animating the Main Menu into view
+task.wait(0.5)  -- Short delay to ensure visibility before animation
+mainFrame:TweenPosition(UDim2.new(0.5, -200, 0.5, -250), "Out", "Quad", 1, true)  -- Animate the position (just in case we need it)
 
 -- Buttons and Scripts
 local button1 = Instance.new("TextButton", mainFrame)
