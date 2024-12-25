@@ -59,25 +59,6 @@ menuFrame.InputEnded:Connect(function(input)
     end
 end)
 
--- Function to make the menu drop down or up
-local menuExpanded = false
-function toggleMenu()
-    if menuExpanded then
-        menuFrame:TweenSize(UDim2.new(0, 250, 0, 50), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
-    else
-        menuFrame:TweenSize(UDim2.new(0, 250, 0, 400), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
-    end
-    menuExpanded = not menuExpanded
-end
-
--- Button to toggle the menu open/close
-local toggleMenuButton = Instance.new("TextButton")
-toggleMenuButton.Text = "Toggle Menu"
-toggleMenuButton.Size = UDim2.new(0, 120, 0, 40)
-toggleMenuButton.Position = UDim2.new(0, 10, 0, 70)
-toggleMenuButton.Parent = menuFrame
-toggleMenuButton.MouseButton1Click:Connect(toggleMenu)
-
 -- Create categories for different settings
 local playerSettings = Instance.new("Frame")
 playerSettings.Size = UDim2.new(1, 0, 0, 100)
@@ -91,44 +72,12 @@ movementSettings.Position = UDim2.new(0, 0, 0, 100)
 movementSettings.BackgroundTransparency = 1
 movementSettings.Parent = buttonContainer
 
--- Player Settings Buttons
-local outlineButton = Instance.new("TextButton")
-outlineButton.Text = "Toggle Outline"
-outlineButton.Size = UDim2.new(0, 150, 0, 50)
-outlineButton.Position = UDim2.new(0, 10, 0, 10)
-outlineButton.Parent = playerSettings
-
-local showInfoButton = Instance.new("TextButton")
-showInfoButton.Text = "Show Player Info"
-showInfoButton.Size = UDim2.new(0, 150, 0, 50)
-showInfoButton.Position = UDim2.new(0, 10, 0, 70)
-showInfoButton.Parent = playerSettings
-
--- Movement Settings Buttons
-local fastAnimationButton = Instance.new("TextButton")
-fastAnimationButton.Text = "Fast Animations"
-fastAnimationButton.Size = UDim2.new(0, 150, 0, 50)
-fastAnimationButton.Position = UDim2.new(0, 10, 0, 10)
-fastAnimationButton.Parent = movementSettings
-
-local flyButton = Instance.new("TextButton")
-flyButton.Text = "Toggle Fly"
-flyButton.Size = UDim2.new(0, 150, 0, 50)
-flyButton.Position = UDim2.new(0, 10, 0, 70)
-flyButton.Parent = movementSettings
-
-local noclipButton = Instance.new("TextButton")
-noclipButton.Text = "Toggle Noclip"
-noclipButton.Size = UDim2.new(0, 150, 0, 50)
-noclipButton.Position = UDim2.new(0, 10, 0, 130)
-noclipButton.Parent = movementSettings
-
--- Placeholder Functions for Each Button
+-- Placeholder Functions for Each Action
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 
 -- For toggling the outline
-outlineButton.MouseButton1Click:Connect(function()
+local function toggleOutline()
     for _, v in pairs(game.Workspace:GetChildren()) do
         if v:IsA("Model") and v:FindFirstChild("Head") then
             local outline = v:FindFirstChild("Outline")
@@ -143,29 +92,44 @@ outlineButton.MouseButton1Click:Connect(function()
             end
         end
     end
-end)
+end
 
 -- For showing player info
-showInfoButton.MouseButton1Click:Connect(function()
-    local playerInfo = "Name: " .. player.Name .. "\n"
-    playerInfo = playerInfo .. "Distance: " .. (player.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude .. " studs\n"
-    playerInfo = playerInfo .. "Join Date: " .. player.AccountAge .. " days"
-    print(playerInfo)
-end)
+local function showPlayerInfo()
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if plr.Character and plr.Character:FindFirstChild("Head") then
+            local distance = (plr.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude
+            local joinDate = plr.AccountAge
+            local playerInfo = "Name: " .. plr.Name .. "\nDistance: " .. distance .. " studs\nJoin Date: " .. joinDate .. " days"
+            local infoGui = Instance.new("BillboardGui")
+            infoGui.Parent = plr.Character.Head
+            infoGui.Adornee = plr.Character.Head
+            infoGui.Size = UDim2.new(0, 200, 0, 50)
+            local infoLabel = Instance.new("TextLabel")
+            infoLabel.Size = UDim2.new(1, 0, 1, 0)
+            infoLabel.Text = playerInfo
+            infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            infoLabel.BackgroundTransparency = 1
+            infoLabel.Parent = infoGui
+            wait(3) -- Keep info displayed for 3 seconds
+            infoGui:Destroy()
+        end
+    end
+end
 
 -- For fast animations (simply adjusts the speed)
-fastAnimationButton.MouseButton1Click:Connect(function()
+local function fastAnimation()
     local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid.WalkSpeed = 100  -- Make walking faster
         humanoid.JumpHeight = 50  -- Make jumping higher
     end
-end)
+end
 
 -- For fly mode
 local flying = false
 local bodyVelocity = nil
-flyButton.MouseButton1Click:Connect(function()
+local function toggleFly()
     if flying then
         bodyVelocity:Destroy()
         flying = false
@@ -176,11 +140,11 @@ flyButton.MouseButton1Click:Connect(function()
         bodyVelocity.Parent = character:FindFirstChild("HumanoidRootPart")
         flying = true
     end
-end)
+end
 
 -- For noclip mode
 local noclip = false
-noclipButton.MouseButton1Click:Connect(function()
+local function toggleNoclip()
     noclip = not noclip
     if noclip then
         character:FindFirstChild("Humanoid").PlatformStand = true
@@ -197,4 +161,56 @@ noclipButton.MouseButton1Click:Connect(function()
             end
         end
     end
-end)
+end
+
+-- Terms of Service Popup
+local tosFrame = Instance.new("Frame")
+tosFrame.Size = UDim2.new(0, 300, 0, 300)
+tosFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+tosFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+tosFrame.BackgroundTransparency = 0.8
+tosFrame.Parent = screenGui
+
+local tosTitle = Instance.new("TextLabel")
+tosTitle.Text = "Terms of Service"
+tosTitle.Size = UDim2.new(1, 0, 0, 30)
+tosTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+tosTitle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+tosTitle.TextSize = 24
+tosTitle.Parent = tosFrame
+
+local tosText = Instance.new("TextLabel")
+tosText.Text = "By using this script, you agree to follow the terms of service. Do not use this mod for malicious purposes. Enjoy your experience!"
+tosText.Size = UDim2.new(1, 0, 0, 100)
+tosText.Position = UDim2.new(0, 0, 0, 30)
+tosText.TextColor3 = Color3.fromRGB(255, 255, 255)
+tosText.BackgroundTransparency = 1
+tosText.TextSize = 16
+tosText.TextWrapped = true
+tosText.Parent = tosFrame
+
+local agreeButton = Instance.new("TextButton")
+agreeButton.Text = "I Agree"
+agreeButton.Size = UDim2.new(0, 120, 0, 40)
+agreeButton.Position = UDim2.new(0.5, -130, 0, 180)
+agreeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+agreeButton.Parent = tosFrame
+
+local disagreeButton = Instance.new("TextButton")
+disagreeButton.Text = "I Disagree"
+disagreeButton.Size = UDim2.new(0, 120, 0, 40)
+disagreeButton.Position = UDim2.new(0.5, 10, 0, 180)
+disagreeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+disagreeButton.Parent = tosFrame
+
+local discordButton = Instance.new("TextButton")
+discordButton.Text = "Join Discord"
+discordButton.Size = UDim2.new(0, 120, 0, 40)
+discordButton.Position = UDim2.new(0.5, -130, 0, 230)
+discordButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+discordButton.Parent = tosFrame
+
+-- Button connections
+agreeButton.MouseButton1Click:Connect(function()
+    tosFrame:Destroy()
+    -- Continue to main menu setup here
