@@ -72,6 +72,62 @@ movementSettings.Position = UDim2.new(0, 0, 0, 100)
 movementSettings.BackgroundTransparency = 1
 movementSettings.Parent = buttonContainer
 
+-- Terms of Service Frame
+local tosFrame = Instance.new("Frame")
+tosFrame.Size = UDim2.new(0, 400, 0, 300)
+tosFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+tosFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+tosFrame.BackgroundTransparency = 0.7
+tosFrame.Visible = false
+tosFrame.Parent = screenGui
+
+local tosTitle = Instance.new("TextLabel")
+tosTitle.Text = "Terms of Service"
+tosTitle.Size = UDim2.new(1, 0, 0, 50)
+tosTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+tosTitle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+tosTitle.TextSize = 24
+tosTitle.Parent = tosFrame
+
+local tosText = Instance.new("TextLabel")
+tosText.Text = "Please read and agree to the terms of service before proceeding.\nDo not use this script maliciously.\n\nBy clicking 'I Agree', you accept our terms.\n\nClick 'I Disagree' to exit."
+tosText.Size = UDim2.new(1, 0, 0, 200)
+tosText.Position = UDim2.new(0, 0, 0, 50)
+tosText.TextColor3 = Color3.fromRGB(255, 255, 255)
+tosText.BackgroundTransparency = 1
+tosText.TextSize = 18
+tosText.Parent = tosFrame
+
+local agreeButton = Instance.new("TextButton")
+agreeButton.Text = "I Agree"
+agreeButton.Size = UDim2.new(0, 150, 0, 50)
+agreeButton.Position = UDim2.new(0, 10, 0, 250)
+agreeButton.Parent = tosFrame
+agreeButton.MouseButton1Click:Connect(function()
+    tosFrame.Visible = false
+    menuFrame.Visible = true
+end)
+
+local disagreeButton = Instance.new("TextButton")
+disagreeButton.Text = "I Disagree"
+disagreeButton.Size = UDim2.new(0, 150, 0, 50)
+disagreeButton.Position = UDim2.new(0, 170, 0, 250)
+disagreeButton.Parent = tosFrame
+disagreeButton.MouseButton1Click:Connect(function()
+    game.Players.LocalPlayer:Kick("You disagreed with the Terms of Service.")
+end)
+
+local discordButton = Instance.new("TextButton")
+discordButton.Text = "Join our Discord"
+discordButton.Size = UDim2.new(0, 150, 0, 50)
+discordButton.Position = UDim2.new(0, 10, 0, 310)
+discordButton.Parent = tosFrame
+discordButton.MouseButton1Click:Connect(function()
+    -- Insert Discord invite link
+    setclipboard("https://discord.gg/yourserverlink")
+    print("Discord link copied to clipboard!")
+end)
+
 -- Placeholder Functions for Each Action
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -101,6 +157,7 @@ local function showPlayerInfo()
             local distance = (plr.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude
             local joinDate = plr.AccountAge
             local playerInfo = "Name: " .. plr.Name .. "\nDistance: " .. distance .. " studs\nJoin Date: " .. joinDate .. " days"
+            -- Display info on top of player's character (can use a BillboardGui for this)
             local infoGui = Instance.new("BillboardGui")
             infoGui.Parent = plr.Character.Head
             infoGui.Adornee = plr.Character.Head
@@ -163,54 +220,42 @@ local function toggleNoclip()
     end
 end
 
--- Terms of Service Popup
-local tosFrame = Instance.new("Frame")
-tosFrame.Size = UDim2.new(0, 300, 0, 300)
-tosFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
-tosFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-tosFrame.BackgroundTransparency = 0.8
-tosFrame.Parent = screenGui
+-- Button to toggle Outline (call this function to activate outline)
+local outlineButton = Instance.new("TextButton")
+outlineButton.Text = "Toggle Outline"
+outlineButton.Size = UDim2.new(0, 150, 0, 50)
+outlineButton.Position = UDim2.new(0, 10, 0, 10)
+outlineButton.Parent = playerSettings
+outlineButton.MouseButton1Click:Connect(toggleOutline)
 
-local tosTitle = Instance.new("TextLabel")
-tosTitle.Text = "Terms of Service"
-tosTitle.Size = UDim2.new(1, 0, 0, 30)
-tosTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-tosTitle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-tosTitle.TextSize = 24
-tosTitle.Parent = tosFrame
+-- Button to show Player Info (call this function to display player info)
+local showInfoButton = Instance.new("TextButton")
+showInfoButton.Text = "Show Player Info"
+showInfoButton.Size = UDim2.new(0, 150, 0, 50)
+showInfoButton.Position = UDim2.new(0, 10, 0, 70)
+showInfoButton.Parent = playerSettings
+showInfoButton.MouseButton1Click:Connect(showPlayerInfo)
 
-local tosText = Instance.new("TextLabel")
-tosText.Text = "By using this script, you agree to follow the terms of service. Do not use this mod for malicious purposes. Enjoy your experience!"
-tosText.Size = UDim2.new(1, 0, 0, 100)
-tosText.Position = UDim2.new(0, 0, 0, 30)
-tosText.TextColor3 = Color3.fromRGB(255, 255, 255)
-tosText.BackgroundTransparency = 1
-tosText.TextSize = 16
-tosText.TextWrapped = true
-tosText.Parent = tosFrame
+-- Button to enable Fast Animations (call this function to enable fast animations)
+local fastAnimationButton = Instance.new("TextButton")
+fastAnimationButton.Text = "Fast Animations"
+fastAnimationButton.Size = UDim2.new(0, 150, 0, 50)
+fastAnimationButton.Position = UDim2.new(0, 10, 0, 10)
+fastAnimationButton.Parent = movementSettings
+fastAnimationButton.MouseButton1Click:Connect(fastAnimation)
 
-local agreeButton = Instance.new("TextButton")
-agreeButton.Text = "I Agree"
-agreeButton.Size = UDim2.new(0, 120, 0, 40)
-agreeButton.Position = UDim2.new(0.5, -130, 0, 180)
-agreeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-agreeButton.Parent = tosFrame
+-- Button to enable Fly Mode (call this function to toggle fly)
+local flyButton = Instance.new("TextButton")
+flyButton.Text = "Toggle Fly"
+flyButton.Size = UDim2.new(0, 150, 0, 50)
+flyButton.Position = UDim2.new(0, 10, 0, 70)
+flyButton.Parent = movementSettings
+flyButton.MouseButton1Click:Connect(toggleFly)
 
-local disagreeButton = Instance.new("TextButton")
-disagreeButton.Text = "I Disagree"
-disagreeButton.Size = UDim2.new(0, 120, 0, 40)
-disagreeButton.Position = UDim2.new(0.5, 10, 0, 180)
-disagreeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-disagreeButton.Parent = tosFrame
-
-local discordButton = Instance.new("TextButton")
-discordButton.Text = "Join Discord"
-discordButton.Size = UDim2.new(0, 120, 0, 40)
-discordButton.Position = UDim2.new(0.5, -130, 0, 230)
-discordButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
-discordButton.Parent = tosFrame
-
--- Button connections
-agreeButton.MouseButton1Click:Connect(function()
-    tosFrame:Destroy()
-    -- Continue to main menu setup here
+-- Button to enable Noclip Mode (call this function to toggle noclip)
+local noclipButton = Instance.new("TextButton")
+noclipButton.Text = "Toggle Noclip"
+noclipButton.Size = UDim2.new(0, 150, 0, 50)
+noclipButton.Position = UDim2.new(0, 10, 0, 130)
+noclipButton.Parent = movementSettings
+noclipButton.MouseButton1Click:Connect(toggleNoclip)
