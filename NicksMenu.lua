@@ -65,7 +65,6 @@ function toggleMenu()
     if menuExpanded then
         menuFrame:TweenSize(UDim2.new(0, 250, 0, 50), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
     else
-        -- Adjust size based on platform (smaller for mobile)
         if isMobile then
             menuFrame:TweenSize(UDim2.new(0, 200, 0, 350), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
         else
@@ -87,15 +86,12 @@ toggleMenuButton.MouseButton1Click:Connect(toggleMenu)
 local UserInputService = game:GetService("UserInputService")
 local isMobile = UserInputService.TouchEnabled
 
--- Adjust layout based on platform
 if isMobile then
-    -- Adjust the size of buttons for mobile
-    menuFrame.Size = UDim2.new(0, 200, 0, 50)  -- Smaller menu for mobile
+    menuFrame.Size = UDim2.new(0, 200, 0, 50)
     menuTitle.TextSize = 20
     toggleMenuButton.Size = UDim2.new(0, 120, 0, 40)
 else
-    -- Adjust the size of buttons for PC
-    menuFrame.Size = UDim2.new(0, 250, 0, 50)  -- Larger menu for PC
+    menuFrame.Size = UDim2.new(0, 250, 0, 50)
     menuTitle.TextSize = 24
     toggleMenuButton.Size = UDim2.new(0, 150, 0, 50)
 end
@@ -145,11 +141,85 @@ noclipButton.Size = UDim2.new(0, 150, 0, 50)
 noclipButton.Position = UDim2.new(0, 10, 0, 130)
 noclipButton.Parent = movementSettings
 
--- Animation control variables (removed, no longer needed)
+-- Placeholder Functions for Each Button
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
--- Button actions
-outlineButton.MouseButton1Click:Connect(function() toggleOutline() end)
-showInfoButton.MouseButton1Click:Connect(function() showPlayerInfo() end)
-fastAnimationButton.MouseButton1Click:Connect(function() fastAnimation() end)
-flyButton.MouseButton1Click:Connect(function() toggleFly() end)
-noclipButton.MouseButton1Click:Connect(function() toggleNoclip() end)
+-- For toggling the outline (Client-side)
+local function toggleOutline()
+    for _, v in pairs(game.Workspace:GetChildren()) do
+        if v:IsA("Model") and v:FindFirstChild("Head") then
+            local outline = v:FindFirstChild("Outline")
+            if not outline then
+                outline = Instance.new("SelectionBox")
+                outline.Name = "Outline"
+                outline.Adornee = v
+                outline.Color3 = Color3.fromRGB(255, 0, 0)  -- Red Outline
+                outline.Parent = v
+            else
+                outline:Destroy()
+            end
+        end
+    end
+end
+
+-- For showing player info (Client-side)
+local function showPlayerInfo()
+    local playerInfo = "Name: " .. player.Name .. "\n"
+    playerInfo = playerInfo .. "Distance: " .. (player.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude .. " studs\n"
+    playerInfo = playerInfo .. "Join Date: " .. player.AccountAge .. " days"
+    print(playerInfo)
+end
+
+-- For fast animations (simply adjusts the speed) (Client-side)
+local function fastAnimation()
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 100  -- Make walking faster
+        humanoid.JumpHeight = 50  -- Make jumping higher
+    end
+end
+
+-- For fly mode (Server-side)
+local flying = false
+local bodyVelocity = nil
+local function toggleFly()
+    if flying then
+        bodyVelocity:Destroy()
+        flying = false
+    else
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+        bodyVelocity.Parent = character:FindFirstChild("HumanoidRootPart")
+        flying = true
+    end
+end
+
+-- For noclip mode (Server-side)
+local noclip = false
+local function toggleNoclip()
+    noclip = not noclip
+    if noclip then
+        character:FindFirstChild("Humanoid").PlatformStand = true
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    else
+        character:FindFirstChild("Humanoid").PlatformStand = false
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end
+
+-- Connect button actions
+outlineButton.MouseButton1Click:Connect(toggleOutline)
+showInfoButton.MouseButton1Click:Connect(showPlayerInfo)
+fastAnimationButton.MouseButton1Click:Connect(fastAnimation)
+flyButton.MouseButton1Click:Connect(toggleFly)
+noclipButton.MouseButton1Click:Connect(toggleNoclip)
