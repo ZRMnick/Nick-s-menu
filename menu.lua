@@ -65,7 +65,7 @@ minimizeButton.MouseButton1Click:Connect(function()
     mainFrame.Size = isMinimized and UDim2.new(0, 400, 0, 60) or UDim2.new(0, 400, 0, 500)
 end)
 
--- Drag Functionality
+-- Drag Functionality (Mobile and PC)
 local dragging
 local dragInput
 local dragStart
@@ -77,7 +77,7 @@ local function updateDrag(input)
 end
 
 titleLabel.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = mainFrame.Position
@@ -91,7 +91,7 @@ titleLabel.InputBegan:Connect(function(input)
 end)
 
 titleLabel.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
