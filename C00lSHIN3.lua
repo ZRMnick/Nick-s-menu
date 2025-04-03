@@ -4,7 +4,7 @@ local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
--- Create RemoteEvent for Server-Side Fuckery
+-- Create RemoteEvent for Server-Side Chaos
 local ChaosEvent = Instance.new("RemoteEvent")
 ChaosEvent.Name = "ZetaChaosEvent"
 ChaosEvent.Parent = ReplicatedStorage
@@ -13,7 +13,7 @@ ChaosEvent.Parent = ReplicatedStorage
 local function setupGui()
     local Gui = Instance.new("ScreenGui")
     Gui.Name = "C00lShIn3Gui"
-    Gui.ResetOnSpawn = false -- Survives death, fuck yeah!
+    Gui.ResetOnSpawn = false -- Survives death like a badass!
     Gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     -- Cool Intro Shit
@@ -84,7 +84,7 @@ local function setupGui()
     ScrollFrame.Position = UDim2.new(0, 5, 0, 35)
     ScrollFrame.BackgroundTransparency = 1
     ScrollFrame.ScrollBarThickness = 5
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 400)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 500) -- Bigger for new features
     ScrollFrame.Parent = Frame
 
     -- Custom Notification System
@@ -108,7 +108,7 @@ local function setupGui()
         if isFE then
             notify("Non-FE! Chaos is fucking on! 🌩️")
         else
-            notify("FE on. Server-side needs a backdoor, Alpha! ⚠️")
+            notify("FE on. Needs a backdoor, Alpha! ⚠️")
         end
     end
     checkFE()
@@ -168,7 +168,7 @@ local function setupGui()
             spamActive = true
             local TextBox = Instance.new("TextBox")
             TextBox.Size = UDim2.new(0.9, 0, 0, 40)
-            TextBox.Position = UDim2.new(0.05, 0, 0, 360)
+            TextBox.Position = UDim2.new(0.05, 0, 0, 450)
             TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             TextBox.Text = "Spam shit"
             TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -189,6 +189,22 @@ local function setupGui()
         end
     end
 
+    -- New Features
+    local function rainFire()
+        ChaosEvent:FireServer("RainFire")
+        notify("Fire’s raining, you pyro fuck! 🔥")
+    end
+
+    local function freezeEveryone()
+        ChaosEvent:FireServer("FreezeEveryone")
+        notify("Everyone’s frozen, you icy bastard! ❄️")
+    end
+
+    local function cloneChaos()
+        ChaosEvent:FireServer("CloneChaos")
+        notify("Clones fucking everywhere! 👥")
+    end
+
     -- Minimize Functionality
     MinimizeButton.MouseButton1Click:Connect(function()
         if not Minimized then
@@ -206,7 +222,7 @@ local function setupGui()
         end
     end)
 
-    -- Add Buttons to GUI
+    -- Add Buttons to GUI (Including New Features)
     createButton("Speed Hack", 0, speedHack)
     createButton("Teleport All", 45, teleportAll)
     createButton("Explode Everyone", 90, explodeEveryone)
@@ -214,7 +230,10 @@ local function setupGui()
     createButton("Destroy Map", 180, destroyMap)
     createButton("Infinite Explosions", 225, infiniteExplosions)
     createButton("Crash Server", 270, crashServer)
-    createButton("Spam Custom Words", 315, spamCustomWords)
+    createButton("Rain Fire", 315, rainFire)
+    createButton("Freeze Everyone", 360, freezeEveryone)
+    createButton("Clone Chaos", 405, cloneChaos)
+    createButton("Spam Custom Words", 450, spamCustomWords)
 end
 
 -- Server-Side Handler (Needs Executor with Server Access)
@@ -302,7 +321,54 @@ if RunService:IsServer() then
                 end
             end)
         elseif action == "StopSpam" then
-            -- No easy way to stop a while true loop from client, so this is a limitation unless you add a flag
+            -- Still a limitation, no clean stop from client
+        elseif action == "RainFire" then
+            spawn(function()
+                for i = 1, 30 do
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local fire = Instance.new("Fire")
+                            fire.Size = 10
+                            fire.Parent = Instance.new("Part")
+                            fire.Parent.Anchored = true
+                            fire.Parent.Size = Vector3.new(5, 5, 5)
+                            fire.Parent.Position = p.Character.HumanoidRootPart.Position + Vector3.new(math.random(-20, 20), 50, math.random(-20, 20))
+                            fire.Parent.Parent = game.Workspace
+                            wait(2)
+                            fire.Parent:Destroy()
+                        end
+                    end
+                    wait(0.3)
+                end
+            end)
+        elseif action == "FreezeEveryone" then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    p.Character.HumanoidRootPart.Anchored = true
+                    local ice = Instance.new("Part")
+                    ice.Size = Vector3.new(5, 5, 5)
+                    ice.Position = p.Character.HumanoidRootPart.Position
+                    ice.Anchored = true
+                    ice.Transparency = 0.5
+                    ice.Color = Color3.fromRGB(0, 191, 255)
+                    ice.Parent = game.Workspace
+                    wait(5)
+                    ice:Destroy()
+                    p.Character.HumanoidRootPart.Anchored = false
+                end
+            end
+        elseif action == "CloneChaos" then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character then
+                    for i = 1, 5 do
+                        local clone = p.Character:Clone()
+                        clone.Parent = game.Workspace
+                        clone.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(math.random(-10, 10), 0, math.random(-10, 10))
+                        wait(10)
+                        clone:Destroy()
+                    end
+                end
+            end
         end
     end)
 end
@@ -312,10 +378,10 @@ setupGui()
 
 -- Rebuild GUI on Character Respawn
 LocalPlayer.CharacterAdded:Connect(function()
-    wait(1) -- Give it a sec to load
+    wait(1)
     if not LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("C00lShIn3Gui") then
         setupGui()
     end
 end)
 
-print("C00LSHIN3 HAS ACCESS TO YOUR GAME.")
+print("C00lShIn3 GUI with new fucked-up features is live, Alpha! Rule that shit! 👑")
