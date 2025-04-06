@@ -1,387 +1,437 @@
--- Zo’s C00lShIn3 GUI for Alpha in Zeta
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
 
--- Create RemoteEvent for Server-Side Chaos
-local ChaosEvent = Instance.new("RemoteEvent")
-ChaosEvent.Name = "ZetaChaosEvent"
-ChaosEvent.Parent = ReplicatedStorage
+-- Wait for Character to load
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart", 10)
+if not HumanoidRootPart then
+    warn("Failed to find HumanoidRootPart. GUI may not function correctly.")
+    return
+end
 
--- GUI Setup (Reset-Proof)
-local function setupGui()
-    local Gui = Instance.new("ScreenGui")
-    Gui.Name = "C00lShIn3Gui"
-    Gui.ResetOnSpawn = false -- Survives death like a badass!
-    Gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+-- Create GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui", 10)
+ScreenGui.ResetOnSpawn = false
+if not ScreenGui.Parent then
+    warn("Failed to parent ScreenGui to PlayerGui. Aborting.")
+    return
+end
 
-    -- Cool Intro Shit
-    local Intro = Instance.new("Frame")
-    Intro.Size = UDim2.new(1, 0, 1, 0)
-    Intro.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Intro.Parent = Gui
-    local IntroText = Instance.new("TextLabel")
-    IntroText.Size = UDim2.new(0.5, 0, 0.2, 0)
-    IntroText.Position = UDim2.new(0.25, 0, 0.4, 0)
-    IntroText.BackgroundTransparency = 1
-    IntroText.Text = "C00lShIn3 GUI\nAlpha’s Zeta Reign"
-    IntroText.TextColor3 = Color3.fromRGB(255, 0, 0)
-    IntroText.TextSize = 30
-    IntroText.Font = Enum.Font.SourceSansBold
-    IntroText.TextStrokeTransparency = 0
-    IntroText.Parent = Intro
-    for i = 1, 10 do
-        IntroText.TextTransparency = i / 10
-        IntroText.TextStrokeTransparency = i / 10
-        wait(0.1)
-    end
-    Intro:Destroy()
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0.6, 0, 0.6, 0)
+Frame.Position = UDim2.new(0.5, -Frame.Size.X.Offset/2, 0.5, -Frame.Size.Y.Offset/2)
+Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
 
-    -- GUI Frame Shit (Small for Mobile)
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 150, 0, 200)
-    Frame.Position = UDim2.new(0.5, -75, 0.5, -100)
-    Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    Frame.BorderSizePixel = 2
-    Frame.Parent = Gui
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.Text = "Carnality GUI | V0.1 (DEV VERSION)"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Title.Parent = Frame
 
-    -- Minimize Button
-    local Minimized = false
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -25, 0, 5)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    MinimizeButton.Text = "-"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.TextSize = 14
-    MinimizeButton.Parent = Frame
+-- Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+MinimizeButton.Position = UDim2.new(1, -30, 0, 0)
+MinimizeButton.Text = "-"
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.Parent = Frame
 
-    -- Title Bar
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Title.Text = "C00lShIn3 GUI"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 16
-    Title.Font = Enum.Font.SourceSansBold
-    Title.Parent = Frame
+-- Features Frame (Category Buttons)
+local FeaturesFrame = Instance.new("Frame")
+FeaturesFrame.Size = UDim2.new(0.4, 0, 1, -40)
+FeaturesFrame.Position = UDim2.new(0, 5, 0, 35)
+FeaturesFrame.BackgroundTransparency = 1
+FeaturesFrame.Parent = Frame
 
-    -- Rule Roblox Text
-    local Footer = Instance.new("TextLabel")
-    Footer.Size = UDim2.new(1, 0, 0, 20)
-    Footer.Position = UDim2.new(0, 0, 1, -20)
-    Footer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Footer.Text = "RULE ROBLOX"
-    Footer.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Footer.TextSize = 12
-    Footer.Font = Enum.Font.SourceSansBold
-    Footer.Parent = Frame
+-- Content Frame (Right Side for Category Content)
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(0.55, 0, 1, -40)
+ContentFrame.Position = UDim2.new(0.45, 0, 0, 35)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ContentFrame.Visible = false
+ContentFrame.Parent = Frame
 
-    -- Scrolling Frame for Buttons
-    local ScrollFrame = Instance.new("ScrollingFrame")
-    ScrollFrame.Size = UDim2.new(1, -10, 1, -60)
-    ScrollFrame.Position = UDim2.new(0, 5, 0, 35)
-    ScrollFrame.BackgroundTransparency = 1
-    ScrollFrame.ScrollBarThickness = 5
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 500) -- Bigger for new features
-    ScrollFrame.Parent = Frame
-
-    -- Custom Notification System
-    local function notify(message)
-        local Notif = Instance.new("TextLabel")
-        Notif.Size = UDim2.new(0, 100, 0, 30)
-        Notif.Position = UDim2.new(0.5, -50, 0, 10)
-        Notif.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        Notif.Text = message
-        Notif.TextColor3 = Color3.fromRGB(255, 0, 0)
-        Notif.TextSize = 12
-        Notif.TextWrapped = true
-        Notif.Parent = Gui
-        wait(3)
-        Notif:Destroy()
-    end
-
-    -- FE Detection
-    local function checkFE()
-        local isFE = RunService:IsServer()
-        if isFE then
-            notify("Non-FE! Chaos is fucking on! 🌩️")
-        else
-            notify("FE on. Needs a backdoor, Alpha! ⚠️")
+-- Function to clear ContentFrame before loading new content
+local function clearContentFrame()
+    local success, err = pcall(function()
+        for _, child in pairs(ContentFrame:GetChildren()) do
+            child:Destroy()
         end
+    end)
+    if not success then
+        warn("Failed to clear ContentFrame: " .. tostring(err))
+        ContentFrame.Visible = false -- Fallback: hide ContentFrame if clearing fails
     end
-    checkFE()
+end
 
-    -- Cheat Button Function
-    local function createButton(name, posY, func)
+-- Add Button Function (For Categories)
+local function addButton(text, posY, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0.9, 0, 0, 25)
+    Button.Position = UDim2.new(0, 0, 0, posY)
+    Button.Text = text
+    Button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextScaled = true
+    Button.Parent = FeaturesFrame
+    Button.MouseButton1Click:Connect(function()
+        local success, err = pcall(function()
+            clearContentFrame() -- Clear previous content
+            callback()
+        end)
+        if not success then
+            warn("Failed to load category '" .. text .. "': " .. tostring(err))
+            ContentFrame.Visible = false -- Hide ContentFrame on failure
+        end
+    end)
+end
+
+-- Category: Credits (Default on Load)
+addButton("Credits", 0, function()
+    ContentFrame.Visible = true
+
+    local CreditsContent = Instance.new("Frame")
+    CreditsContent.Size = UDim2.new(1, 0, 1, 0)
+    CreditsContent.BackgroundTransparency = 1
+    CreditsContent.Parent = ContentFrame
+
+    local CreditsText = Instance.new("TextLabel")
+    CreditsText.Size = UDim2.new(1, 0, 1, 0)
+    CreditsText.Position = UDim2.new(0, 0, 0, 0)
+    CreditsText.Text = "Scripted by: C00lShIn3\nDiscord: discord.gg/82hMwkxaA7\nYouTube: youtube.com/@E.xposure"
+    CreditsText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CreditsText.BackgroundTransparency = 1
+    CreditsText.TextScaled = true
+    CreditsText.Parent = CreditsContent
+
+    print("Credits category loaded.")
+end)
+
+-- Category: Code Executor
+addButton("Code Executor", 30, function()
+    ContentFrame.Visible = true
+
+    local CodeContent = Instance.new("Frame")
+    CodeContent.Size = UDim2.new(1, 0, 1, 0)
+    CodeContent.BackgroundTransparency = 1
+    CodeContent.Parent = ContentFrame
+
+    local CodeTitle = Instance.new("TextLabel")
+    CodeTitle.Size = UDim2.new(1, 0, 0, 30)
+    CodeTitle.Text = "Code Executor"
+    CodeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CodeTitle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    CodeTitle.Parent = CodeContent
+
+    local CodeBox = Instance.new("TextBox")
+    CodeBox.Size = UDim2.new(0.9, 0, 0, 80)
+    CodeBox.Position = UDim2.new(0.05, 0, 0, 40)
+    CodeBox.Text = "Put code here..."
+    CodeBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CodeBox.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    CodeBox.TextScaled = true
+    CodeBox.TextWrapped = true
+    CodeBox.ClearTextOnFocus = true
+    CodeBox.Parent = CodeContent
+
+    local ExecuteButton = Instance.new("TextButton")
+    ExecuteButton.Size = UDim2.new(0.9, 0, 0, 25)
+    ExecuteButton.Position = UDim2.new(0.05, 0, 0, 130)
+    ExecuteButton.Text = "Execute"
+    ExecuteButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ExecuteButton.Parent = CodeContent
+
+    local StatusLabel = Instance.new("TextLabel")
+    StatusLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    StatusLabel.Position = UDim2.new(0.05, 0, 0, 160)
+    StatusLabel.Text = "Status: Idle"
+    StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.TextScaled = true
+    StatusLabel.Parent = CodeContent
+
+    ExecuteButton.MouseButton1Click:Connect(function()
+        local code = CodeBox.Text
+        local func, err = loadstring(code)
+        if func then
+            local success, runErr = pcall(function()
+                func()
+                StatusLabel.Text = "Status: Executed code!"
+                print("Code executed successfully.")
+            end)
+            if not success then
+                StatusLabel.Text = "Status: Error - " .. tostring(runErr)
+                warn("Code execution failed: " .. tostring(runErr))
+            end
+        else
+            StatusLabel.Text = "Status: Invalid code - " .. tostring(err)
+            warn("Invalid code: " .. tostring(err))
+        end
+    end)
+
+    print("Code Executor category loaded.")
+end)
+
+-- Category: Hacks
+addButton("Hacks", 60, function() -- Adjusted position since Require Executor is removed
+    ContentFrame.Visible = true
+
+    local HacksContent = Instance.new("Frame")
+    HacksContent.Size = UDim2.new(1, 0, 1, 0)
+    HacksContent.BackgroundTransparency = 1
+    HacksContent.Parent = ContentFrame
+
+    local HacksTitle = Instance.new("TextLabel")
+    HacksTitle.Size = UDim2.new(1, 0, 0, 30)
+    HacksTitle.Text = "Hacks"
+    HacksTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    HacksTitle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    HacksTitle.Parent = HacksContent
+
+    -- Add Hack Buttons Function (For Hacks Category)
+    local function addHackButton(text, posY, callback)
         local Button = Instance.new("TextButton")
-        Button.Size = UDim2.new(0.9, 0, 0, 40)
+        Button.Size = UDim2.new(0.9, 0, 0, 25)
         Button.Position = UDim2.new(0.05, 0, 0, posY)
-        Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        Button.Text = name
+        Button.Text = text
+        Button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
         Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Button.TextSize = 14
-        Button.Parent = ScrollFrame
-        Button.MouseButton1Click:Connect(func)
+        Button.TextScaled = true
+        Button.Parent = HacksContent
+        Button.MouseButton1Click:Connect(callback)
     end
 
-    -- Client-Side Cheat Triggers (Fires to Server)
-    local function speedHack()
-        ChaosEvent:FireServer("SpeedHack")
-        notify("Zooming every fucker! 🏃‍♂️")
-    end
-
-    local function teleportAll()
-        ChaosEvent:FireServer("TeleportAll", LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame)
-        notify("All bitches in the sky! 🌌")
-    end
-
-    local function explodeEveryone()
-        ChaosEvent:FireServer("ExplodeEveryone")
-        notify("Boom, motherfuckers! 💥")
-    end
-
-    local function giveAllTools()
-        ChaosEvent:FireServer("GiveAllTools")
-        notify("Tools for all, you greedy shits! 🛠️")
-    end
-
-    local function destroyMap()
-        ChaosEvent:FireServer("DestroyMap")
-        notify("Map’s fucked to hell! 🏚️")
-    end
-
-    local function infiniteExplosions()
-        ChaosEvent:FireServer("InfiniteExplosions")
-        notify("Explosions everywhere, you chaotic fuck! 💣")
-    end
-
-    local function crashServer()
-        ChaosEvent:FireServer("CrashServer")
-        notify("Server’s getting fucked hard! 💀")
-    end
-
-    local spamActive = false
-    local function spamCustomWords()
-        if not spamActive then
-            spamActive = true
-            local TextBox = Instance.new("TextBox")
-            TextBox.Size = UDim2.new(0.9, 0, 0, 40)
-            TextBox.Position = UDim2.new(0.05, 0, 0, 450)
-            TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            TextBox.Text = "Spam shit"
-            TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextBox.TextSize = 14
-            TextBox.Parent = ScrollFrame
-            
-            TextBox.FocusLost:Connect(function(enterPressed)
-                if enterPressed then
-                    local spamText = TextBox.Text
-                    ChaosEvent:FireServer("SpamCustomWords", spamText)
-                    notify("Spamming your fucked-up words! 📢")
-                end
-            end)
+    -- Hack 1: Speed Hack
+    addHackButton("Speed Hack", 35, function()
+        local humanoid = Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = humanoid.WalkSpeed == 16 and 32 or 16
+            print(humanoid.WalkSpeed == 32 and "Speed boosted, Alpha! 🏃‍♂️" or "Speed reset, Alpha! 🚶")
         else
-            spamActive = false
-            ChaosEvent:FireServer("StopSpam")
-            notify("Spam’s off, you crazy bastard! 🛑")
-        end
-    end
-
-    -- New Features
-    local function rainFire()
-        ChaosEvent:FireServer("RainFire")
-        notify("Fire’s raining, you pyro fuck! 🔥")
-    end
-
-    local function freezeEveryone()
-        ChaosEvent:FireServer("FreezeEveryone")
-        notify("Everyone’s frozen, you icy bastard! ❄️")
-    end
-
-    local function cloneChaos()
-        ChaosEvent:FireServer("CloneChaos")
-        notify("Clones fucking everywhere! 👥")
-    end
-
-    -- Minimize Functionality
-    MinimizeButton.MouseButton1Click:Connect(function()
-        if not Minimized then
-            Frame.Size = UDim2.new(0, 150, 0, 30)
-            ScrollFrame.Visible = false
-            Footer.Visible = false
-            MinimizeButton.Text = "+"
-            Minimized = true
-        else
-            Frame.Size = UDim2.new(0, 150, 0, 200)
-            ScrollFrame.Visible = true
-            Footer.Visible = true
-            MinimizeButton.Text = "-"
-            Minimized = false
+            warn("Speed Hack failed: Humanoid not found.")
         end
     end)
 
-    -- Add Buttons to GUI (Including New Features)
-    createButton("Speed Hack", 0, speedHack)
-    createButton("Teleport All", 45, teleportAll)
-    createButton("Explode Everyone", 90, explodeEveryone)
-    createButton("Give All Tools", 135, giveAllTools)
-    createButton("Destroy Map", 180, destroyMap)
-    createButton("Infinite Explosions", 225, infiniteExplosions)
-    createButton("Crash Server", 270, crashServer)
-    createButton("Rain Fire", 315, rainFire)
-    createButton("Freeze Everyone", 360, freezeEveryone)
-    createButton("Clone Chaos", 405, cloneChaos)
-    createButton("Spam Custom Words", 450, spamCustomWords)
-end
+    -- Hack 2: Teleport Random
+    addHackButton("Teleport Random", 65, function()
+        local players = Players:GetPlayers()
+        local target = players[math.random(1, #players)]
+        if target ~= LocalPlayer and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+            print("Teleported to " .. target.Name .. ", Alpha! 🌌")
+        else
+            warn("Teleport Random failed: No valid target found.")
+        end
+    end)
 
--- Server-Side Handler (Needs Executor with Server Access)
-if RunService:IsServer() then
-    ChaosEvent.OnServerEvent:Connect(function(player, action, data)
-        if action == "SpeedHack" then
-            for _, p in pairs(Players:GetPlayers()) do
-                local humanoid = p.Character and p.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.WalkSpeed = 150
-                end
+    -- Hack 3: Invisibility
+    local invisible = false
+    addHackButton("Invisibility", 95, function()
+        invisible = not invisible
+        for _, part in pairs(Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = invisible and 1 or 0
             end
-        elseif action == "TeleportAll" and data then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    p.Character.HumanoidRootPart.CFrame = data * CFrame.new(math.random(-10, 10), 50, math.random(-10, 10))
-                end
-            end
-        elseif action == "ExplodeEveryone" then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local explosion = Instance.new("Explosion")
-                    explosion.Position = p.Character.HumanoidRootPart.Position
-                    explosion.BlastRadius = 50
-                    explosion.Parent = game.Workspace
-                end
-            end
-        elseif action == "GiveAllTools" then
-            for _, tool in pairs(ReplicatedStorage:GetChildren()) do
+        end
+        print(invisible and "You’re a ghost, Alpha! 👻" or "Visible again, Alpha! 😎")
+    end)
+
+    -- Hack 4: Steal Tool
+    addHackButton("Steal Tool", 125, function()
+        local target = Players:GetPlayers()[math.random(2, #Players:GetPlayers())]
+        if target and target.Character and target.Backpack then
+            for _, tool in pairs(target.Backpack:GetChildren()) do
                 if tool:IsA("Tool") then
-                    for _, p in pairs(Players:GetPlayers()) do
-                        tool:Clone().Parent = p.Backpack
-                    end
+                    tool:Clone().Parent = LocalPlayer.Backpack
+                    print("Stole " .. tool.Name .. " from " .. target.Name .. ", Alpha! 🕵️")
+                    break
                 end
             end
-        elseif action == "DestroyMap" then
-            for _, part in pairs(game.Workspace:GetDescendants()) do
-                if part:IsA("BasePart") and not part.Parent:FindFirstChild("Humanoid") then
-                    part:Destroy()
-                end
-            end
-        elseif action == "InfiniteExplosions" then
-            spawn(function()
-                for i = 1, 20 do
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local explosion = Instance.new("Explosion")
-                            explosion.Position = p.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
-                            explosion.BlastRadius = 30
-                            explosion.Parent = game.Workspace
-                        end
-                    end
-                    wait(0.5)
-                end
-            end)
-        elseif action == "CrashServer" then
-            while true do
-                for i = 1, 1000 do
-                    Instance.new("Part", game.Workspace)
-                end
-                wait(0.1)
-            end
-        elseif action == "SpamCustomWords" and data then
-            spawn(function()
-                while true do
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p.Character and p.Character:FindFirstChild("Head") then
-                            local billboard = Instance.new("BillboardGui")
-                            billboard.Size = UDim2.new(0, 100, 0, 30)
-                            billboard.Adornee = p.Character.Head
-                            billboard.StudsOffset = Vector3.new(0, 3, 0)
-                            billboard.Parent = p.Character
-                            local label = Instance.new("TextLabel")
-                            label.Size = UDim2.new(1, 0, 1, 0)
-                            label.BackgroundTransparency = 1
-                            label.Text = data
-                            label.TextColor3 = Color3.fromRGB(255, 0, 0)
-                            label.TextSize = 16
-                            label.Parent = billboard
-                            wait(1)
-                            billboard:Destroy()
-                        end
-                    end
-                    wait(0.1)
-                end
-            end)
-        elseif action == "StopSpam" then
-            -- Still a limitation, no clean stop from client
-        elseif action == "RainFire" then
-            spawn(function()
-                for i = 1, 30 do
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local fire = Instance.new("Fire")
-                            fire.Size = 10
-                            fire.Parent = Instance.new("Part")
-                            fire.Parent.Anchored = true
-                            fire.Parent.Size = Vector3.new(5, 5, 5)
-                            fire.Parent.Position = p.Character.HumanoidRootPart.Position + Vector3.new(math.random(-20, 20), 50, math.random(-20, 20))
-                            fire.Parent.Parent = game.Workspace
-                            wait(2)
-                            fire.Parent:Destroy()
-                        end
-                    end
-                    wait(0.3)
-                end
-            end)
-        elseif action == "FreezeEveryone" then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    p.Character.HumanoidRootPart.Anchored = true
-                    local ice = Instance.new("Part")
-                    ice.Size = Vector3.new(5, 5, 5)
-                    ice.Position = p.Character.HumanoidRootPart.Position
-                    ice.Anchored = true
-                    ice.Transparency = 0.5
-                    ice.Color = Color3.fromRGB(0, 191, 255)
-                    ice.Parent = game.Workspace
-                    wait(5)
-                    ice:Destroy()
-                    p.Character.HumanoidRootPart.Anchored = false
-                end
-            end
-        elseif action == "CloneChaos" then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p.Character then
-                    for i = 1, 5 do
-                        local clone = p.Character:Clone()
-                        clone.Parent = game.Workspace
-                        clone.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(math.random(-10, 10), 0, math.random(-10, 10))
-                        wait(10)
-                        clone:Destroy()
-                    end
-                end
-            end
+        else
+            warn("Steal Tool failed: No valid target or tools found.")
         end
     end)
-end
 
--- Initial GUI Setup
-setupGui()
+    -- Hack 5: ESP
+    local espEnabled = false
+    local espConnections = {}
+    addHackButton("ESP", 155, function()
+        espEnabled = not espEnabled
+        if espEnabled then
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    local highlight = Instance.new("Highlight")
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.Parent = player.Character
+                    espConnections[player] = highlight
+                end
+            end
+            print("ESP activated, Alpha! 👀")
+        else
+            for _, connection in pairs(espConnections) do
+                connection:Destroy()
+            end
+            espConnections = {}
+            print("ESP deactivated, Alpha! 🕶️")
+        end
+    end)
 
--- Rebuild GUI on Character Respawn
-LocalPlayer.CharacterAdded:Connect(function()
-    wait(1)
-    if not LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("C00lShIn3Gui") then
-        setupGui()
+    -- Hack 6: Fly
+    local flying = false
+    local flyConnection
+    addHackButton("Fly", 185, function()
+        flying = not flying
+        local humanoid = Character:FindFirstChild("Humanoid")
+        local rootPart = HumanoidRootPart
+        if flying and humanoid and rootPart then
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            local bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+            bv.Velocity = Vector3.new(0, 0, 0)
+            bv.Parent = rootPart
+            if flyConnection then flyConnection:Disconnect() end
+            flyConnection = RunService.RenderStepped:Connect(function()
+                if not flying then return end
+                local cam = workspace.CurrentCamera
+                local moveDir = Vector3.new(
+                    (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.A) and 1 or 0),
+                    (UserInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) and 1 or 0),
+                    (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0)
+                ).Unit * 50
+                bv.Velocity = cam.CFrame:VectorToWorldSpace(moveDir)
+                rootPart.CFrame = CFrame.new(rootPart.Position) * cam.CFrame.Rotation
+            end)
+            print("Flying high, Alpha! ✈️")
+        else
+            if flyConnection then flyConnection:Disconnect() end
+            if rootPart and rootPart:FindFirstChild("BodyVelocity") then
+                rootPart:FindFirstChild("BodyVelocity"):Destroy()
+            end
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+            end
+            print("Landed, Alpha! 🌍")
+        end
+    end)
+
+    print("Hacks category loaded.")
+end)
+
+-- Minimize Logic
+local minimized = false
+MinimizeButton.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        Frame.Size = UDim2.new(0.6, 0, 0, 30)
+        FeaturesFrame.Visible = false
+        ContentFrame.Visible = false
+        MinimizeButton.Text = "+"
+        print("GUI minimized.")
+    else
+        Frame.Size = UDim2.new(0.6, 0, 0.6, 0)
+        FeaturesFrame.Visible = true
+        MinimizeButton.Text = "-"
+        -- Reopen Credits by default when expanding
+        if not ContentFrame.Visible then
+            clearContentFrame()
+            local creditsButton = FeaturesFrame:GetChildren()[1] -- First button (Credits)
+            creditsButton:FindFirstChildWhichIsA("TextButton").MouseButton1Click:Invoke()
+        end
+        print("GUI expanded.")
+    end)
+end)
+
+-- ESP Player Handling
+Players.PlayerAdded:Connect(function(player)
+    if espEnabled and player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function(char)
+            local highlight = Instance.new("Highlight")
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            highlight.Parent = char
+            espConnections[player] = highlight
+        end)
     end
 end)
 
-print("C00lShIn3 GUI with new fucked-up features is live, Alpha! Rule that shit! 👑")
+Players.PlayerRemoving:Connect(function(player)
+    if espConnections[player] then
+        espConnections[player]:Destroy()
+        espConnections[player] = nil
+    end
+end)
+
+-- Character Respawn Handling
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    HumanoidRootPart = newChar:WaitForChild("HumanoidRootPart", 10)
+    if not HumanoidRootPart then
+        warn("Failed to find HumanoidRootPart on respawn.")
+        return
+    end
+
+    if invisible then
+        for _, part in pairs(newChar:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 1
+            end
+        end
+    end
+
+    if flying then
+        local humanoid = newChar:FindFirstChild("Humanoid")
+        local rootPart = HumanoidRootPart
+        if humanoid and rootPart then
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            local bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+            bv.Velocity = Vector3.new(0, 0, 0)
+            bv.Parent = rootPart
+            if flyConnection then flyConnection:Disconnect() end
+            flyConnection = RunService.RenderStepped:Connect(function()
+                if not flying then return end
+                local cam = workspace.CurrentCamera
+                local moveDir = Vector3.new(
+                    (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.A) and 1 or 0),
+                    (UserInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) and 1 or 0),
+                    (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0)
+                ).Unit * 50
+                bv.Velocity = cam.CFrame:VectorToWorldSpace(moveDir)
+                rootPart.CFrame = CFrame.new(rootPart.Position) * cam.CFrame.Rotation
+            end)
+        end
+    end
+
+    print("Character respawned and state updated.")
+end)
+
+-- Automatically open Credits category on load
+local success, err = pcall(function()
+    for _, child in pairs(FeaturesFrame:GetChildren()) do
+        if child:IsA("TextButton") and child.Text == "Credits" then
+            child.MouseButton1Click:Invoke()
+            break
+        end
+    end
+end)
+if not success then
+    warn("Failed to open Credits category on load: " .. tostring(err))
+end
+
+print("Carnality GUI loaded, Alpha! Require Executor removed—ready to roll! 🔴✨")
